@@ -1,11 +1,18 @@
-var MAP_HEIGHT = 20;
-var PUMP_RADIUS = 3;
-var PUMP_COLOR = "orange";
+const MAP_HEIGHT = 20;
+const PUMP_RADIUS = 2.5;
+const PUMP_COLOR = "green";
+
+const DEATH_RADIUS = 3;
+const DEATH_COLOR = "#ff000066";
+
+const viewBox = "0 0 850 400";
+const WIDTH = 600;
+const HEIGHT = 400;
 
 var mapSVGContainer = d3.select("div")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
-    .attr("viewBox", "0 0 1000 400")
+    .attr("viewBox", viewBox)
     .classed("svg-content-responsive", true);
 
 var drawLine = d3.svg.line()
@@ -19,39 +26,12 @@ function drawMap(item) {
     .attr("stroke", "steelblue")
     .attr("stroke-width", 1.5)
     .attr("fill", "white")
-    .classed("line", true)
-    .attr("width", 600)
-    .attr("height", 400);
+    .classed("line", true);
 }
 
 d3.json("knowledge/streets.json", function(data) {
     data.forEach(drawMap);
 });
-
-var pumpSVGContainer = d3.select("div")
-    .append("svg")
-    .attr("preserveAspectRatio", "xMinYMin meet")
-    .attr("viewBox", "0 0 1000 400")
-    .classed("svg-content-responsive", true);
-
-var circles = pumpSVGContainer.selectAll("circle")
-                        .append("circle");
-                        
-function drawPumps(item) {
-    var g = pumpSVGContainer
-        .append("g")
-        .attr("transform", function(d) {
-            return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
-        })
-        // .on("mouseover", function(){return handleMouseOver(this, item);})
-        // .on("mouseout", function(){return handleMouseOut(this, item);});
-
-        g.append("circle")
-        .attr("r", PUMP_RADIUS)
-        .attr("fill",PUMP_COLOR)
-        .attr("width", 600)
-        .attr("height", 400)
-    }
 
 // Create Event Handlers for mouse
 function handleMouseOver(g,d) {  // Add interactivity
@@ -77,6 +57,54 @@ function handleMouseOut(g,d) {
     // Select text by id and then remove
     d3.select(g).selectAll("text").remove();  // Remove text location
     }
+
+var deathsSVGContainer = d3.select("div")
+    .append("svg")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", viewBox)
+    .classed("svg-content-responsive", true);
+
+function drawDeathCircle(item) {
+    var g = deathsSVGContainer
+        .append("g")
+        .attr("transform", function(d) {
+            return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
+        })
+        // .on("mouseover", function(){return handleMouseOver(this, item);})
+        // .on("mouseout", function(){return handleMouseOut(this, item);});
+
+        g.append("circle")
+        .attr("r", DEATH_RADIUS)
+        .attr("fill",DEATH_COLOR);
+}
+
+d3.csv("knowledge/deaths_age_sex.csv", function(data) {
+    data.forEach(drawDeathCircle)
+})
+
+var pumpSVGContainer = d3.select("div")
+    .append("svg")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", viewBox)
+    .classed("svg-content-responsive", true);
+
+// var circles = pumpSVGContainer.selectAll("circle")
+//                         .append("circle");
+                        
+function drawPumps(item) {
+    var g = pumpSVGContainer
+        .append("g")
+        .attr("transform", function(d) {
+            return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
+        })
+        // .on("mouseover", function(){return handleMouseOver(this, item);})
+        // .on("mouseout", function(){return handleMouseOut(this, item);});
+
+        g.append("circle")
+        .attr("r", PUMP_RADIUS)
+        .attr("fill",PUMP_COLOR)
+}
+
 d3.csv("knowledge/pumps.csv", function(data) {
     data.forEach(drawPumps);
 });
