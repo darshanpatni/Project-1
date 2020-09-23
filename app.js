@@ -4,6 +4,8 @@ const PUMP_COLOR = "green";
 
 const DEATH_RADIUS = 3;
 const DEATH_COLOR = "#ff000066";
+const MALE_COLOR = "#7700ff66"
+const FEMALE_COLOR = "#ff000066";
 
 const viewBox = "0 0 500 500";
 const WIDTH = 600;
@@ -54,7 +56,11 @@ var deathsSVGContainer = d3.select("#map")
 
 d3.csv("knowledge/deaths_age_sex.csv", function(data) {
     data.forEach(element => {
-        drawCircle(element, DEATH_RADIUS, DEATH_COLOR, deathsSVGContainer)
+        if (element.gender==0) {
+            drawCircle(element, DEATH_RADIUS, MALE_COLOR, deathsSVGContainer)
+        } else {
+            drawCircle(element, DEATH_RADIUS, FEMALE_COLOR, deathsSVGContainer)
+        }
     });
 })
 
@@ -82,7 +88,7 @@ var xScale = d3.scaleBand().range([0, width]).padding(0.4),
 
 var g = barChartContainer.append("g")
             .attr("transform", "translate(" + 100 + "," + 100 + ")");
-            
+
 d3.csv("knowledge/deathdays.csv", function(data) {
     drawBarChart(data, g);
 });
