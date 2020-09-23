@@ -2,40 +2,31 @@
 <head>
     <meta charset="utf-8">
     <title>D3 Practice</title>
-    <style>
-        .line {
-            stroke: steelblue
-        }
-        .svg-container {
-            display: inline-block;
-            position: relative;
-            width: 100%;
-            padding-bottom: 100%; /* aspect ratio */
-            vertical-align: top;
-            overflow: hidden;
-        }
-        .svg-content-responsive {
-            display: inline-block;
-            position: absolute;
-            left: 0;
-        }
-        .circle {
-            fill:red
-        }
-        .rotated {
-            transform: rotate(-1deg); /* Equal to rotateZ(45deg) */
-        }
+    <link rel="stylesheet" href="assets/css/style.css">
 
-    </style>
-    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    
     
 </head>
 <body>
-    <div id="#map" class="rotated">
-    </div>
-    <div id="#barchart">
+    <div class="float-container">
 
-    </div>
-    <script src="app.js"></script>
+        <div class="float-child-left" >
+            <div id="map" class="rotated">
+            </div>
+        </div>
+        
+        <div class="float-child-right">
+            <div id="barchart">
+                <svg id="main" width="800" height="600">
+                    <g transform="translate(20,40)"></g>
+                </svg>
+            </div>
+        </div>
+        
+      </div>
+      <script src="app.js"></script>
+      <script src="assets/js/SvgUtility.js"></script>
+
 </body>
 </html>

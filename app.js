@@ -5,29 +5,15 @@ const PUMP_COLOR = "green";
 const DEATH_RADIUS = 3;
 const DEATH_COLOR = "#ff000066";
 
-const viewBox = "0 0 850 400";
+const viewBox = "0 0 500 500";
 const WIDTH = 600;
 const HEIGHT = 400;
 
-var mapSVGContainer = d3.select("div")
+var mapSVGContainer = d3.select("#map")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", viewBox)
     .classed("svg-content-responsive", true);
-
-var drawLine = d3.svg.line()
-.x(function(d) { return MAP_HEIGHT*d.x; })
-.y(function(d) { return MAP_HEIGHT*d.y; })
-.interpolate("linear");
-
-function drawMap(item) {
-    var lineGraph = mapSVGContainer.append("path")
-    .attr("d", drawLine(item))
-    .attr("stroke", "steelblue")
-    .attr("stroke-width", 1.5)
-    .attr("fill", "white")
-    .classed("line", true);
-}
 
 d3.json("knowledge/streets.json", function(data) {
     data.forEach(drawMap);
@@ -45,7 +31,7 @@ function handleMouseOver(g,d) {  // Add interactivity
     d3.select(g)
     .append("text")
     .text("Pump");
-    }
+}
 
 function handleMouseOut(g,d) {
     // Use D3 to select element, change color back to normal
@@ -58,31 +44,19 @@ function handleMouseOut(g,d) {
     d3.select(g).selectAll("text").remove();  // Remove text location
     }
 
-var deathsSVGContainer = d3.select("div")
+var deathsSVGContainer = d3.select("#map")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", viewBox)
     .classed("svg-content-responsive", true);
 
-function drawDeathCircle(item) {
-    var g = deathsSVGContainer
-        .append("g")
-        .attr("transform", function(d) {
-            return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
-        })
-        // .on("mouseover", function(){return handleMouseOver(this, item);})
-        // .on("mouseout", function(){return handleMouseOut(this, item);});
-
-        g.append("circle")
-        .attr("r", DEATH_RADIUS)
-        .attr("fill",DEATH_COLOR);
-}
-
 d3.csv("knowledge/deaths_age_sex.csv", function(data) {
-    data.forEach(drawDeathCircle)
+    data.forEach(element => {
+        drawCircle(element, DEATH_RADIUS, DEATH_COLOR)
+    });
 })
 
-var pumpSVGContainer = d3.select("div")
+var pumpSVGContainer = d3.select("#map")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", viewBox)
@@ -90,21 +64,25 @@ var pumpSVGContainer = d3.select("div")
 
 // var circles = pumpSVGContainer.selectAll("circle")
 //                         .append("circle");
-                        
-function drawPumps(item) {
-    var g = pumpSVGContainer
-        .append("g")
-        .attr("transform", function(d) {
-            return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
-        })
-        // .on("mouseover", function(){return handleMouseOver(this, item);})
-        // .on("mouseout", function(){return handleMouseOut(this, item);});
-
-        g.append("circle")
-        .attr("r", PUMP_RADIUS)
-        .attr("fill",PUMP_COLOR)
-}
 
 d3.csv("knowledge/pumps.csv", function(data) {
-    data.forEach(drawPumps);
+    data.forEach(element => {
+        drawCircle(element, PUMP_RADIUS, PUMP_COLOR)
+    });
+});
+
+var svg = d3.select("#main"),
+            margin = 110,
+            width = svg.attr("width") - margin,
+            height = svg.attr("height") - 250
+
+
+var xScale = d3.scaleBand().range([0, width]).padding(0.4),
+            yScale = d3.scaleLinear().range([height, 0]);
+
+var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+d3.csv("knowledge/deathdays.csv", function(data) {
+    drawBarChart(data);
 });
