@@ -16,7 +16,9 @@ var mapSVGContainer = d3.select("#map")
     .classed("svg-content-responsive", true);
 
 d3.json("knowledge/streets.json", function(data) {
-    data.forEach(drawMap);
+    data.forEach(element => {
+        drawMap(element, mapSVGContainer)
+    });
 });
 
 // Create Event Handlers for mouse
@@ -52,7 +54,7 @@ var deathsSVGContainer = d3.select("#map")
 
 d3.csv("knowledge/deaths_age_sex.csv", function(data) {
     data.forEach(element => {
-        drawCircle(element, DEATH_RADIUS, DEATH_COLOR)
+        drawCircle(element, DEATH_RADIUS, DEATH_COLOR, deathsSVGContainer)
     });
 })
 
@@ -62,27 +64,25 @@ var pumpSVGContainer = d3.select("#map")
     .attr("viewBox", viewBox)
     .classed("svg-content-responsive", true);
 
-// var circles = pumpSVGContainer.selectAll("circle")
-//                         .append("circle");
 
 d3.csv("knowledge/pumps.csv", function(data) {
     data.forEach(element => {
-        drawCircle(element, PUMP_RADIUS, PUMP_COLOR)
+        drawCircle(element, PUMP_RADIUS, PUMP_COLOR, pumpSVGContainer)
     });
 });
 
-var svg = d3.select("#main"),
+var barChartContainer = d3.select("#main"),
             margin = 110,
-            width = svg.attr("width") - margin,
-            height = svg.attr("height") - 250
+            width = barChartContainer.attr("width") - margin,
+            height = barChartContainer.attr("height") - 250
 
 
 var xScale = d3.scaleBand().range([0, width]).padding(0.4),
             yScale = d3.scaleLinear().range([height, 0]);
 
-var g = svg.append("g")
+var g = barChartContainer.append("g")
             .attr("transform", "translate(" + 100 + "," + 100 + ")");
-
+            
 d3.csv("knowledge/deathdays.csv", function(data) {
-    drawBarChart(data);
+    drawBarChart(data, g);
 });

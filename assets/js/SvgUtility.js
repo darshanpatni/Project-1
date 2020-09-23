@@ -11,8 +11,8 @@ var drawLine = d3.line()
  *Draw map function 
  *parameter - one pair of xy co-ordinates
  */
-function drawMap(item) {
-    var lineGraph = mapSVGContainer.append("path")
+function drawMap(item, container) {
+    var lineGraph = container.append("path")
     .attr("d", drawLine(item))
     .attr("stroke", "steelblue")
     .attr("stroke-width", 1.5)
@@ -51,8 +51,8 @@ function handleMouseOut(g,d) {
  * @param {x,y coordinates} item 
  */
 
-function drawCircle(item, radius, color) {
-    var g = deathsSVGContainer
+function drawCircle(item, radius, color, container) {
+    var g = container
         .append("g")
         .attr("transform", function(d) {
             return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
@@ -70,7 +70,7 @@ function drawCircle(item, radius, color) {
  * Draw Bar Chart for death days
  * @param {deathdays csv data} data 
  */
-function drawBarChart(data) {
+function drawBarChart(data, svg) {
     var maxValue = 0;
     d3.max(data, function(d) {
     
