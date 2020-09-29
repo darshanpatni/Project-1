@@ -1,3 +1,4 @@
+
 /**
  * CODE FOR DRAWING MAP
  */
@@ -53,17 +54,40 @@ function handleMouseOut(g,d) {
 
 function drawCircle(item, radius, color, container) {
     var g = container
-        .append("g")
-        .attr("transform", function(d) {
-            return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
-        })
-        
-        // .on("mouseover", function(){return handleMouseOver(this, item);})
-        // .on("mouseout", function(){return handleMouseOut(this, item);});
+    .append("g")
+    .attr("transform", function(d) {
+        return "translate(" + MAP_HEIGHT*item.x + ","+ MAP_HEIGHT*item.y +")" ;
+    })
+    
+    // .on("mouseover", function(){return handleMouseOver(this, item);})
+    // .on("mouseout", function(){return handleMouseOut(this, item);});
 
-        g.append("circle")
+    g.append("circle")
+    .attr("r", radius)
+    .attr("fill",color);
+}
+
+function drawCircles(data, radius, container, scale) {
+    
+    container.selectAll("g")
+        .data(data)
+        .enter()
+        .append("g")
+        .append("circle")
+        .attr("fill", function(d) {
+            if (d.gender==0) {
+                return MALE_COLOR;
+            } else {
+                return FEMALE_COLOR;
+            }
+        })
+        .attr("cx", function(d, i) { 
+            return scale*d.x })
+        .attr("cy", function(d, i) { return scale*d.y })
         .attr("r", radius)
-        .attr("fill",color);
+        .on("mouseover", function(item){return handleMouseOverForLineChat(this, item);})
+        .on("mouseout", function(item){return handleMouseOutForLineChat(this, item);});
+
 }
 
 /**
@@ -111,4 +135,63 @@ function drawBarChart(data, svg) {
     .attr("y", function(d) { return yScale(d.deaths); })
     .attr("width", xScale.bandwidth())
     .attr("height", function(d) { return height - yScale(d.deaths); });
+}
+
+function drawLineChart(data, svg, width, height) {
+    // parse the date / time
+    var parseTime = d3.timeParse("%d-%b");
+
+    // set the ranges
+    var x = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+    // define the line
+    var valueline = d3.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.deaths); });
+
+    // format the data
+    data.forEach(function(d) {
+        d.date = parseTime(d.date);
+        d.deaths = +d.deaths;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.deaths; })]);
+
+    // Add the valueline path.
+    svg.append("path")
+        .data([data])
+        .attr("class", "line-chart")
+        .attr("d", valueline);
+
+    
+    svg.selectAll(".dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("class", "dot")
+        .attr("cx", function(d, i) { 
+            return x(d.date) })
+        .attr("cy", function(d, i) { return y(d.deaths) })
+        .attr("r", 5)
+        .on("mouseover", function(item){return handleMouseOverForLineChat(this, item);})
+        .on("mouseout", function(item){return handleMouseOutForLineChat(this, item);});
+
+    // Add the X Axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add the Y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    svg.selectAll(".domain")
+    .attr("class", "axes");
+
+    svg.selectAll(".tick")
+    .selectAll("line")
+    .attr("class", "axes");
 }

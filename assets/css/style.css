@@ -1,11 +1,29 @@
 .line {
-    stroke: steelblue
+    stroke: steelblue;
+    fill: none;
+    stroke-width: 2;
 }
+
+.line-chart {
+    stroke: steelblue;
+    fill: none;
+    stroke-width: 3;
+}
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+
+.dot-selected {
+    fill: red;
+    stroke: #fff;
+}
+
 .svg-container {
     display: inline-block;
     position: relative;
     width: 100%;
-    padding-bottom: 100%; /* aspect ratio */
+    padding-bottom: 100%;
     vertical-align: top;
     overflow: hidden;
 }
@@ -18,7 +36,10 @@
     fill:red
 }
 .rotated {
-    transform: rotate(-1deg); /* Equal to rotateZ(45deg) */
+    transform: rotate(0deg); 
+    width: 100%;
+    height: 600px;
+    background: #151D33;
 }
 
 text { 
@@ -27,11 +48,17 @@ text {
 }
 .axis path, .axis line {
     fill: none;
-    stroke: black;
+    stroke: white;
     shape-rendering: crispEdges;
 }
+
+.axes {
+    stroke: #fff;
+    stroke-width: 2;
+}
+
 .tick text {
-    fill: black;
+    fill: white;
     font-size: 11px;
 }
 
@@ -41,23 +68,51 @@ rect {
 }
 
 .float-container {
-    border: 3px solid #fff;
+    /* border: 3px solid #fff; */
     padding: 20px;
 }
 
 .float-child-left {
-    width: 45%;
+    width: 47%;
     float: left;
-    padding: 20px;
+    /* padding: 20px; */
     /* border: 2px solid red; */
 }
 .float-child-right {
-    width: 55%;
+    width: 50%;
     float: right;
-    padding: 20px;
+    /* padding: 20px; */
     /* border: 2px solid red; */
 }    
 
 .bar {
     fill: steelblue;
+}
+
+div.tooltip {
+    position: absolute;
+    /* text-align: center; */
+    width: 80;
+    height: 55;
+    padding: 7px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+body {
+    background-color: #161625;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.caption-line-chart {
+    color: white;
+    text-align-last: center;
+    margin-top: -10%;
+}
+
+svg.line-chart-bg {
+    background-color: #151D33;
 }
