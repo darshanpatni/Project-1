@@ -52,7 +52,7 @@ function handleMouseOut(g,d) {
  * @param {x,y coordinates} item 
  */
 
-function drawCircle(item, radius, color, container) {
+function drawCircle(item, radius, color, container, legend) {
     var g = container
     .append("g")
     .attr("transform", function(d) {
@@ -64,30 +64,63 @@ function drawCircle(item, radius, color, container) {
 
     g.append("circle")
     .attr("r", radius)
-    .attr("fill",color);
+    .attr("fill", function() {
+        if(legend) {
+            return circleColor(item, legend)
+        } else {
+            return color;
+        }
+    })
+    .attr("stroke", "#7f7f7f");
 }
 
-function drawCircles(data, radius, container, scale) {
+function drawCircles(data, radius, container, scale, legend) {
     
-    container.selectAll("g")
+    container.selectAll(".dot-map")
         .data(data)
         .enter()
-        .append("g")
         .append("circle")
+        .attr("class", ".dot-map")
         .attr("fill", function(d) {
-            if (d.gender==0) {
-                return MALE_COLOR;
-            } else {
-                return FEMALE_COLOR;
-            }
+            return circleColor(d, legend);
         })
+        .attr("stroke", "#7f7f7f")
         .attr("cx", function(d, i) { 
             return scale*d.x })
         .attr("cy", function(d, i) { return scale*d.y })
         .attr("r", radius)
-        .on("mouseover", function(item){return handleMouseOverForLineChat(this, item);})
-        .on("mouseout", function(item){return handleMouseOutForLineChat(this, item);});
+        .on("mouseover", function(item){return handleMouseOverForMap(this, item);})
+        .on("mouseout", function(item){return handleMouseOutForMap(this, item);});
+}
 
+function circleColor(data, legend) {
+    switch(legend) {
+        case LEGEND_NONE:
+            return DEATH_COLOR;
+        case LEGEND_AGE:
+            switch(parseInt(data.age)) {
+                case AGE_1TO10:
+                    return AGE_HASH_MAP.get(AGE_1TO10);
+                case AGE_11TO20:
+                    return AGE_HASH_MAP.get(AGE_11TO20);
+                case AGE_21TO40:
+                    return AGE_HASH_MAP.get(AGE_21TO40);
+                case AGE_41TO60:
+                    return AGE_HASH_MAP.get(AGE_41TO60);
+                case AGE_61TO80:
+                    return AGE_HASH_MAP.get(AGE_61TO80);
+                default:
+                    return AGE_HASH_MAP.get(AGE_80);
+            }
+        case LEGEND_SEX:
+            if (data.gender==0) {
+                return MALE_COLOR;
+            } else {
+                return FEMALE_COLOR;
+            }
+        default:
+            return "#000"
+    }
 }
 
 /**
@@ -165,7 +198,6 @@ function drawLineChart(data, svg, width, height) {
         .data([data])
         .attr("class", "line-chart")
         .attr("d", valueline);
-
     
     svg.selectAll(".dot")
         .data(data)

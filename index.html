@@ -12,12 +12,124 @@
     <div class="float-container">
 
         <div class="float-child-left" >
-            <div id="map" class="rotated">
+            
+            <div class="child-float-container">
+                <div class="child-left">
+                    <div class="map-container-div">
+                        <div id="map" class="rotated"> </div>
+                    </div>
+                </div>
+                <div class="child-right">
+                    <div class="legend-div">
+                        Select Legend
+                        <div>
+                            <select class="legend-dropdown" id="legend-selector" onchange="onLegendUpdate()">
+                                <option value = 1>None</option>
+                                <option value = 2>Age</option>
+                                <option value = 3>Sex</option>
+                            </select>
+                        </div>                        
+                    
+                        <div class="legend-table-div">    
+                            <table id="none-legend">
+                                <tr>
+                                <td>
+                                <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#ff000099" stroke="#7f7f7f" />
+                                </svg>
+                                </td>
+                                <td>Deaths</td>
+                                </tr>
+                            </table>
+
+                            <table id="sex-legend">
+                                <tr>
+                                    <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#256676cc" stroke="#7f7f7f" />
+                                    </svg>
+                                </td>
+                                    <td>Male</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                    <svg width="30" height="30">
+                                        <circle cx="15" cy="15" r="6" fill="#b6e45ccc" stroke="#7f7f7f" />
+                                    </svg>
+                                    </td>
+                                    <td>Female</td>
+                                </tr>
+                            </table>
+
+                            <table id="age-legend">
+                            
+                                <td>
+                                <svg width="30" height="30">
+                                <circle cx="15" cy="15" r="6" fill="#4f8c9d99" stroke="#7f7f7f" />
+                                </svg>
+                            </td>
+                                <td>1 to 10</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#94d2cf99" stroke="#7f7f7f" />
+                                </svg>
+                                </td>
+                                <td>11 to 20</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#0b522e99" stroke="#7f7f7f" />
+                                    </svg>
+                                </td>
+                                <td>21 to 40</td>
+                                </tr>
+                                <tr>
+                                <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#4cf18599" stroke="#7f7f7f" />
+                                    </svg>
+                                </td>
+                                <td>41 to 60</td>
+                                </tr>
+                                <tr>
+                                <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#35972199" stroke="#7f7f7f" />
+                                    </svg>
+                                </td>
+                                <td>61 to 80</td>
+                                </tr>
+                                <tr>
+                                <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#bde26799" stroke="#7f7f7f" />
+                                    </svg>
+                                </td>
+                                <td>>80</td>
+                                </tr>
+                            </table>
+                            <table id="pump-legend">
+                                <tr>
+                                <td>
+                                    <svg width="30" height="30">
+                                    <circle cx="15" cy="15" r="6" fill="#20272F" stroke="#7f7f7f" />
+                                    </svg>
+                                </td>
+                                <td>Water Pump</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
         
         <div class="float-child-right">
-            <div id="barchart">
+            <div>
                 <svg class="line-chart-bg" id="main" width="100%" height="600">
                     <g transform="translate(20,40)"></g>
                 </svg>
