@@ -71,20 +71,22 @@ function drawCircle(item, radius, color, container, legend) {
             return color;
         }
     })
-    .attr("stroke", "#7f7f7f");
+    .attr("stroke", "#4f4f4f");
 }
 
-function drawCircles(data, radius, container, scale, legend) {
-    
+function drawCircles(data, radius, container, scale, legend, color) {
     container.selectAll(".dot-map")
         .data(data)
         .enter()
         .append("circle")
         .attr("class", ".dot-map")
         .attr("fill", function(d) {
+            if(color) {
+                return color;
+            }
             return circleColor(d, legend);
         })
-        .attr("stroke", "#7f7f7f")
+        .attr("stroke", "#4f4f4f")
         .attr("cx", function(d, i) { 
             return scale*d.x })
         .attr("cy", function(d, i) { return scale*d.y })
@@ -127,19 +129,45 @@ function circleColor(data, legend) {
  * Draw Bar Chart for death days
  * @param {deathdays csv data} data 
  */
-function drawBarChart(data, svg) {
+function drawBarChart(data, svg, width, height) {
+    console.log(data)
+    var ageRanges = ["1 to 10", "11 to 20", "21 to 40", "41 to 60", "61 to 80", "> 80"]
     var maxValue = 0;
     d3.max(data, function(d) {
-    
-        if(parseInt(d.deaths)>parseInt(maxValue)) {
-            maxValue = d.deaths;
+        if(parseInt(d.totalDeaths)>parseInt(maxValue)) {
+            maxValue = d.totalDeaths;
         }
     });
+    var xScale = d3.scaleBand()
+    .domain(ageRanges)       // This is what is written on the Axis: from 0 to 100
+    .range([0, width])                       // This is where the axis is placed: from 100 px to 800px
+    .padding([0.6])    
+    var yScale = d3.scaleLinear().range([height, 0]);
+    yScale.domain([0, d3.max(data, function(d) { 
+        return d.totalDeaths+17;
+     })]);
 
-    xScale.domain(data.map(function(d) { return d.date; }));
-    yScale.domain([0, maxValue]);
+    svg.selectAll(".male-bar")
+    .data(data)
+    .enter().append("rect")
+    .attr("class", "male-bar")
+    .attr("x", function(d,i) { return xScale(ageRanges[i]); })
+    .attr("y", function(d) { 
+        return yScale(d.maleDeaths); })
+    .attr("width", xScale.bandwidth())
+    .attr("height", function(d) { return height - yScale(d.maleDeaths); });
 
-    g.append("g")
+    svg.selectAll(".female-bar")
+    .data(data)
+    .enter().append("rect")
+    .attr("class", "female-bar")
+    .attr("x", function(d,i) { return xScale(ageRanges[i]); })
+    .attr("y", function(d) { 
+        return yScale(d.totalDeaths); })
+    .attr("width", xScale.bandwidth())
+    .attr("height", function(d) { return height - yScale(d.femaleDeaths); });
+    
+    svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(xScale))
     .selectAll("text")
@@ -147,8 +175,7 @@ function drawBarChart(data, svg) {
     .attr("dy", "-.55em")
     .attr("transform", "rotate(-90)" );
 
-
-    g.append("g")
+    svg.append("g")
     .call(d3.axisLeft(yScale).tickFormat(function(d){
         return d;
     })
@@ -160,14 +187,31 @@ function drawBarChart(data, svg) {
     .attr("text-anchor", "end")
     .attr("stroke", "black");
 
-    g.selectAll(".bar")
-    .data(data)
-    .enter().append("rect")
-    .attr("class", "bar")
-    .attr("x", function(d) { return xScale(d.date); })
-    .attr("y", function(d) { return yScale(d.deaths); })
-    .attr("width", xScale.bandwidth())
-    .attr("height", function(d) { return height - yScale(d.deaths); });
+    svg.selectAll(".domain")
+    .attr("class", "axes");
+
+    svg.selectAll(".tick")
+    .selectAll("line")
+    .attr("class", "axes");
+
+    // text label for the x axis
+    svg.append("text")             
+    .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                        (height + 80) + ")")
+    .style("text-anchor", "middle")
+    .text("Age Range");
+
+    // text label for the y axis
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - 60)
+    .attr("x",0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Number of Deaths");  
+
+
 }
 
 function drawLineChart(data, svg, width, height) {
@@ -191,7 +235,7 @@ function drawLineChart(data, svg, width, height) {
 
     // Scale the range of the data
     x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.deaths; })]);
+    y.domain([0, d3.max(data, function(d) { return d.deaths+17; })]);
 
     // Add the valueline path.
     svg.append("path")
@@ -226,4 +270,79 @@ function drawLineChart(data, svg, width, height) {
     svg.selectAll(".tick")
     .selectAll("line")
     .attr("class", "axes");
+
+    // text label for the x axis
+    svg.append("text")             
+    .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                        (height + 50) + ")")
+    .style("text-anchor", "middle")
+    .text("Timeline");
+
+    // text label for the y axis
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - 60)
+    .attr("x",0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Number of Deaths");  
+
+}
+
+function addBursh(svg) {
+     // Add brushing
+     var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+     .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+     .on("end", updateChart )               // Each time the brush selection changes, trigger the 'updateChart' function
+
+    // Create the line variable: where both the line and the brush take place
+    var line = svg.append('g')
+    .attr("clip-path", "url(#clip)")
+
+    // Add the brushing
+    line
+    .append("g")
+    .attr("class", "brush")
+    .call(brush);
+
+    svg.on("dblclick", function() {
+        line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+    })
+}
+
+function removeBrush(svg) {
+    svg.selectAll(".brush").remove();
+}
+
+function updateChart() {
+    console.log(d3.event.selection)
+    eventXPoints = d3.event.selection;
+    var listOfCircles = lineChartSvg.selectAll(".dot")._groups[0]
+    var listOfDeaths = [];
+    for (let index = 0; index < listOfCircles.length; index++) {
+        var self = d3.select(listOfCircles[index]);
+        var element = d3.select(listOfCircles[index]).data()[0];
+        x = parseFloat(self.attr('cx')) + parseFloat(2)
+        if(x<eventXPoints[1]) {
+            if(eventXPoints[0]<x) {
+                console.log(x)
+                var element = d3.select(listOfCircles[index]).data()[0];
+                listOfDeaths.push.apply(listOfDeaths, getDeathsForDate(getStringFromDate(element.date)))
+            }
+        } else break;
+    }
+    deathsSVGContainer.selectAll("circle").remove();
+    drawCircles(listOfDeaths, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
+}
+
+function getDeathsForDate(date) {
+    return DEATH_DATE_HASH_MAP.get(date).deathList
+}
+
+function getStringFromDate(date) {
+    var month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
+    var day = new Intl.DateTimeFormat('en', { day: 'numeric' }).format(date);
+    var dateString = `${day}-${month}`;
+    return dateString;
 }

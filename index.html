@@ -35,7 +35,7 @@
                                 <tr>
                                 <td>
                                 <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#ff000099" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#ff0000" stroke="#4f4f4f" />
                                 </svg>
                                 </td>
                                 <td>Deaths</td>
@@ -46,7 +46,7 @@
                                 <tr>
                                     <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#256676cc" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#d95f02" stroke="#4f4f4f" />
                                     </svg>
                                 </td>
                                     <td>Male</td>
@@ -54,7 +54,7 @@
                                 <tr>
                                     <td>
                                     <svg width="30" height="30">
-                                        <circle cx="15" cy="15" r="6" fill="#b6e45ccc" stroke="#7f7f7f" />
+                                        <circle cx="15" cy="15" r="6" fill="#1b9e77" stroke="#4f4f4f" />
                                     </svg>
                                     </td>
                                     <td>Female</td>
@@ -65,7 +65,7 @@
                             
                                 <td>
                                 <svg width="30" height="30">
-                                <circle cx="15" cy="15" r="6" fill="#4f8c9d99" stroke="#7f7f7f" />
+                                <circle cx="15" cy="15" r="6" fill="#4575b4" stroke="#4f4f4f" />
                                 </svg>
                             </td>
                                 <td>1 to 10</td>
@@ -73,7 +73,7 @@
                             <tr>
                                 <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#94d2cf99" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#91bfdb" stroke="#4f4f4f" />
                                 </svg>
                                 </td>
                                 <td>11 to 20</td>
@@ -81,7 +81,7 @@
                             <tr>
                                 <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#0b522e99" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#e0f3f8" stroke="#4f4f4f" />
                                     </svg>
                                 </td>
                                 <td>21 to 40</td>
@@ -89,7 +89,7 @@
                                 <tr>
                                 <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#4cf18599" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#fee090" stroke="#4f4f4f" />
                                     </svg>
                                 </td>
                                 <td>41 to 60</td>
@@ -97,7 +97,7 @@
                                 <tr>
                                 <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#35972199" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#fc8d59" stroke="#4f4f4f" />
                                     </svg>
                                 </td>
                                 <td>61 to 80</td>
@@ -105,7 +105,7 @@
                                 <tr>
                                 <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#bde26799" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#d73027" stroke="#4f4f4f" />
                                     </svg>
                                 </td>
                                 <td>>80</td>
@@ -115,7 +115,7 @@
                                 <tr>
                                 <td>
                                     <svg width="30" height="30">
-                                    <circle cx="15" cy="15" r="6" fill="#20272F" stroke="#7f7f7f" />
+                                    <circle cx="15" cy="15" r="6" fill="#20272F" stroke="#4f4f4f" />
                                     </svg>
                                 </td>
                                 <td>Water Pump</td>
@@ -126,17 +126,67 @@
                 </div>
             </div>
             </div>
-        </div>
         
         <div class="float-child-right">
+            <div class="child-float-container child-float-container-title">
+                <div class="child-left-title">
+                    <p class="caption-line-chart">Deaths through the time</p>
+                </div>
+                <div class="child-right-title">
+                    <div class="child-float-container">
+                        <div class="child-left-title">
+                            <p class="caption-line-chart">Date range selector</p>
+                            
+                        </div>
+                        <div class="child-right-title">
+                            <p class="caption-line-chart">
+                                <label class="switch">
+                                    <input type="checkbox" onclick='handleBrushToggle(this);'>
+                                    <span class="slider round"></span>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div>
                 <svg class="line-chart-bg" id="main" width="100%" height="600">
-                    <g transform="translate(20,40)"></g>
                 </svg>
             </div>
-            <p class="caption-line-chart">Timeline of deaths</p>
+            
         </div>
-        
+    </div>
+      </div>
+      <div class="float-container bar-chart-container">
+          <div class="float-child-left">
+            <div class="legend-table-div bar-chart-legend">    
+
+            <table id="sex-legend">
+                <tr>
+                    <td>
+                    <svg width="30" height="30">
+                    <rect x="7.5" y="7.5" width="15" height="15" fill="#d95f02" />
+                    </svg>
+                </td>
+                    <td>Male</td>
+                </tr>
+                <tr>
+                    <td>
+                    <svg width="30" height="30">
+                        <rect x="7.5" y="7.5" width="15" height="15" fill="#1b9e77" />
+                    </svg>
+                    </td>
+                    <td>Female</td>
+                </tr>
+            </table>
+            </div>
+              <div>
+                  <svg class="line-chart-bg" id="bar-chart" width="100%" height="500">
+                  </svg>
+              </div>
+              <p class="caption-bar-chart">Distribution of deaths by Age and Sex</p>
+
+          </div>
       </div>
       <script src="app.js"></script>
       <script src="assets/js/SvgUtility.js"></script>
