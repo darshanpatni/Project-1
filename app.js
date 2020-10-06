@@ -1,8 +1,8 @@
 const MAP_HEIGHT = 20;
-const PUMP_RADIUS = 4;
+const PUMP_RADIUS = 7;
 const PUMP_COLOR = "#20272F";
 
-const DEATH_RADIUS = 3;
+const DEATH_RADIUS = 2;
 const DEATH_COLOR = "#ff0000";
 const MALE_COLOR = "#d95f02"
 const FEMALE_COLOR = "#1b9e77";
@@ -53,6 +53,9 @@ AGE_DEATH_HASH_MAP.set(AGE_61TO80, Object.assign({}, ageDeathSample));
 AGE_DEATH_HASH_MAP.set(AGE_80, Object.assign({}, ageDeathSample));
 
 var selectedLegend = 1;
+var currentDisplayedList = [];
+var selectedCircleData = undefined;
+var selectedCircleG = undefined;
 
 function onLegendUpdate() {
     var eID = document.getElementById("legend-selector");
@@ -60,7 +63,7 @@ function onLegendUpdate() {
     if(deathsSVGContainer!=null) {
         deathsSVGContainer.selectAll("circle").remove();
     }
-    displayAllDeaths();
+    displayAllDeaths(currentDisplayedList);
     displayLegend(selectedLegend);
 }
 
@@ -98,13 +101,27 @@ function showAgeLegend() {
     document.getElementById(LEGEND_NONE_ID).style.display = "none";
 }
 
+var brushTooltip = d3.select("body").append("div")	
+    .attr("class", "tooltip-brush")				
+    .style("opacity", 0);
+
 // Define the div for the tooltip
 var chartTooltip = d3.select("body").append("div")	
     .attr("class", "tooltip-chart")				
     .style("opacity", 0);
 
+function equalToEventTarget() {
+    return this == d3.event.target;
+}
+
 // Create Event Handlers for mouse
 function handleMouseOverForLineChat(g,d) {  // Add interactivity
+    if(!selectedCircleData) {
+        showLineChartTooltip(g,d);
+    }
+}
+
+function showLineChartTooltip(g,d) {
     // Use D3 to select element, change color and size
     d3.select(g)
     .attr("r", 7)
@@ -123,7 +140,8 @@ function handleMouseOverForLineChat(g,d) {  // Add interactivity
     chartTooltip.transition()		
         .duration(200)		
         .style("opacity", .9);		
-    chartTooltip.html(dateString 
+    chartTooltip.html(
+        dateString 
         + "<br/>"  
         + "<b>Deaths: </b>"+d.deaths
         + "<br/>"
@@ -131,23 +149,58 @@ function handleMouseOverForLineChat(g,d) {  // Add interactivity
         + "<br/>"
         + "<b>Female: </b>"+DEATH_DATE_HASH_MAP.get(dateString).femaleDeaths)	
         .style("left", (d3.event.pageX + 20) + "px")		
-        .style("top", (d3.event.pageY - 28) + "px");	
+        .style("top", (d3.event.pageY - 28) + "px");
 }
 
 function handleMouseOutForLineChat(g,d) {
+    if(!selectedCircleData) {
+        removeLineChartTooltip(g,d);
+    }
+}
+
+function removeLineChartTooltip(g, d) {
     // Use D3 to select element, change color back to normal
     d3.select(g)
     .attr("r", 5)
     .attr("class", "dot");
 
     deathsSVGContainer.selectAll("g").remove();
-    displayAllDeaths();
+    currentDisplayedList = DEATHS_AGE_SEX_LIST;
+    displayAllDeaths(DEATHS_AGE_SEX_LIST);
 
     chartTooltip.transition()		
     .duration(500)		
     .style("opacity", 0);	
-    // Select text by id and then remove
     d3.select(g).selectAll("text").remove();  // Remove text location
+}
+
+function handleMouseClickForLineChart(g, d) {    
+    if(!selectedCircleData) {
+        selectedCircleG = g;
+        selectedCircleData = d;
+        showLineChartTooltip(selectedCircleG, selectedCircleData);
+    } else if(selectedCircleData && d && g && selectedCircleData.date!=d.date) {
+        removeLineChartTooltip(selectedCircleG,selectedCircleData)
+        selectedCircleG = g;
+        selectedCircleData = d;
+        showLineChartTooltip(selectedCircleG, selectedCircleData);
+    } else {
+        removeLineChartTooltip(selectedCircleG,selectedCircleData)
+        selectedCircleG = undefined;
+        selectedCircleData = undefined;
+    }
+}
+
+function handleMouseClickOutsideLineChart() {
+    console.log(d3.event.target)
+    console.log(selectedCircleG)
+    if(selectedCircleData) {
+        if(d3.event.target!=selectedCircleG) {
+            removeLineChartTooltip(selectedCircleG, selectedCircleData);
+            selectedCircleG = undefined;
+            selectedCircleData = undefined;
+        }
+    }
 }
 
 function getAgeRangeInString(sex) {
@@ -205,7 +258,7 @@ function handleMouseOverForMap(g,d) {  // Add interactivity
         + "<br/>"
         + "<b>Age: </b>"+getAgeRangeInString(d.age))	
         .style("left", (d3.event.pageX + 20) + "px")		
-        .style("top", (d3.event.pageY - 28) + "px");	
+        .style("top", (d3.event.pageY - 28) + "px");
 }
 
 function handleMouseOutForMap(g,d) {
@@ -261,8 +314,8 @@ function createDateDeathHashMapV2() {
                 DEATH_DATE_HASH_MAP.get(element.date)["maleDeaths"] = maleDeaths;
                 DEATH_DATE_HASH_MAP.get(element.date)["femaleDeaths"] = femaleDeaths;
             }
-            displayAllDeaths();
-            console.log(AGE_DEATH_HASH_MAP)
+            currentDisplayedList = DEATHS_AGE_SEX_LIST;
+            displayAllDeaths(currentDisplayedList);
             var barChartContainer = d3.select("#bar-chart"),
             margin = 110,
             width = 650 - margin,
@@ -283,14 +336,23 @@ function filterDeathDaysByDateV2(date) {
     deathsSVGContainer.selectAll("circle").remove();
     var deathsOnDate = DEATH_DATE_HASH_MAP.get(date).deathsOnDate;
     var sumOfDeathsTillDate = DEATH_DATE_HASH_MAP.get(date).sumOfDeathsTillDate;
-    drawCircles(DEATH_DATE_HASH_MAP.get(date).deathList, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
+    currentDisplayedList = DEATH_DATE_HASH_MAP.get(date).deathList;
+    drawCircles(currentDisplayedList, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
 }
+
+var scale = 1.0;
+
+var zoom = d3.zoom()
+    .scaleExtent([1, 5])
+    .on("zoom", zoomed);
 
 var mapSVGContainer = d3.select("#map")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", viewBox)
-    .classed("svg-content-responsive", true);
+    .classed("svg-content-responsive", true)
+    // .call(zoom);
+    ;
 
 d3.json("knowledge/streets.json", function(data) {
     data.forEach(element => {
@@ -302,6 +364,8 @@ var lineChartContainer = d3.select("#main"),
             margin = 110,
             width = 750 - margin,
             height = lineChartContainer.attr("height") - 250
+
+lineChartContainer.on("click", handleMouseClickOutsideLineChart);
 
 var lineChartSvg = lineChartContainer.append("g")
             .attr("transform", "translate(" + 70 + "," + 100 + ")");
@@ -316,8 +380,8 @@ var deathsSVGContainer = d3.select("#map")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", viewBox)
-    .classed("svg-content-responsive", true);
-
+    .classed("svg-content-responsive", true)
+    // .call(zoom);
 
 function drawDeathCircles(death, radius) {
     if (death.gender==0) {
@@ -327,28 +391,53 @@ function drawDeathCircles(death, radius) {
     }
 }
 
-function displayAllDeaths() {
-    drawCircles(DEATHS_AGE_SEX_LIST, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
+function displayAllDeaths(list) {
+    drawCircles(list, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
 }
 
 var pumpSVGContainer = d3.select("#map")
     .append("svg")
     .attr("preserveAspectRatio", "xMinYMin meet")
     .attr("viewBox", viewBox)
-    .classed("svg-content-responsive-pumps", true);
+    .classed("svg-content-responsive-pumps", true)
+    // .call(zoom);
 
 d3.csv("knowledge/pumps.csv", function(data) {
     PUMPS_LIST = data;
-    drawCircles(PUMPS_LIST, PUMP_RADIUS, pumpSVGContainer, MAP_HEIGHT, selectedLegend, PUMP_COLOR)
+    drawRectangles(PUMPS_LIST, PUMP_RADIUS, pumpSVGContainer, MAP_HEIGHT, selectedLegend, PUMP_COLOR)
 });
+
+function zoomed() {
+    console.log(d3.event)
+    var translateX = d3.event.transform.x;
+    var translateY = d3.event.transform.y;
+    var xScale = d3.event.transform.k;
+    mapSVGContainer.attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + xScale + ")");
+    deathsSVGContainer.attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + xScale + ")");
+    pumpSVGContainer.attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + xScale + ")");
+  }
+  
+function reset() {
+    scale = 1.0;
+    mapSVGContainer.attr("transform", "translate(0,0)scale(1,1)");
+    deathsSVGContainer.attr("transform", "translate(0,0)scale(1,1)");
+    pumpSVGContainer.attr("transform", "translate(0,0)scale(1,1)");
+    zoom.scale(scale)
+    .translate([0,0]);
+}
 
 function handleBrushToggle(cb){
     console.log(cb.checked)
     if(cb.checked) {
+        if(selectedCircleData) {
+            removeLineChartTooltip(selectedCircleG, selectedCircleData);
+        }
         addBursh(lineChartSvg)
     } else {
         removeBrush(lineChartSvg)
         deathsSVGContainer.selectAll("circle").remove();
-        displayAllDeaths();
+        currentDisplayedList = DEATHS_AGE_SEX_LIST;
+        displayAllDeaths(DEATHS_AGE_SEX_LIST);
+        d3.select('.line-chart-bg').dispatch('click');
     }
 }

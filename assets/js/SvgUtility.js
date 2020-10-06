@@ -95,6 +95,25 @@ function drawCircles(data, radius, container, scale, legend, color) {
         .on("mouseout", function(item){return handleMouseOutForMap(this, item);});
 }
 
+function drawRectangles(data, side, container, scale, legend, color) {
+    container.selectAll(".male-bar")
+    .data(data)
+    .enter().append("rect")
+    .attr("x", function(d,i) { return scale*d.x; })
+    .attr("y", function(d) { 
+        return scale*d.y; })
+    .attr("width", side)
+    .attr("height", side)
+    .attr("fill", function(d) {
+        if(color) {
+            return color;
+        }
+        return circleColor(d, legend);
+    })
+    .attr("stroke", "#afafaf")
+    ;
+}
+
 function circleColor(data, legend) {
     switch(legend) {
         case LEGEND_NONE:
@@ -252,6 +271,7 @@ function drawLineChart(data, svg, width, height) {
             return x(d.date) })
         .attr("cy", function(d, i) { return y(d.deaths) })
         .attr("r", 5)
+        .on("click", function(item){return handleMouseClickForLineChart(this, item)})
         .on("mouseover", function(item){return handleMouseOverForLineChat(this, item);})
         .on("mouseout", function(item){return handleMouseOutForLineChat(this, item);});
 
@@ -307,33 +327,81 @@ function addBursh(svg) {
     .call(brush);
 
     svg.on("dblclick", function() {
-        line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+        line.select(".brush").call(brush.move, null)
+        // This remove the grey brush area as soon as the selection has been done
     })
 }
 
 function removeBrush(svg) {
+    brushTooltip.transition()		
+    .duration(500)		
+    .style("opacity", 0);	
+    // Select text by id and then remove
+    d3.select(".brush").selectAll("text").remove();  // Remove text location
     svg.selectAll(".brush").remove();
 }
 
 function updateChart() {
-    console.log(d3.event.selection)
-    eventXPoints = d3.event.selection;
-    var listOfCircles = lineChartSvg.selectAll(".dot")._groups[0]
-    var listOfDeaths = [];
-    for (let index = 0; index < listOfCircles.length; index++) {
-        var self = d3.select(listOfCircles[index]);
-        var element = d3.select(listOfCircles[index]).data()[0];
-        x = parseFloat(self.attr('cx')) + parseFloat(2)
-        if(x<eventXPoints[1]) {
-            if(eventXPoints[0]<x) {
-                console.log(x)
-                var element = d3.select(listOfCircles[index]).data()[0];
-                listOfDeaths.push.apply(listOfDeaths, getDeathsForDate(getStringFromDate(element.date)))
-            }
-        } else break;
+    var maleDeaths = 0,
+        femaleDeaths = 0,
+        totalDeaths = 0;
+    var firstDate = undefined,
+        lastDate = undefined;
+    // Define the div for the tooltip
+    
+    if(d3.event.selection!=null) {
+        eventXPoints = d3.event.selection;
+        var listOfCircles = lineChartSvg.selectAll(".dot")._groups[0]
+        var listOfDeaths = [];
+        for (let index = 0; index < listOfCircles.length; index++) {
+            var self = d3.select(listOfCircles[index]);
+            var element = d3.select(listOfCircles[index]).data()[0];
+            x = parseFloat(self.attr('cx')) + parseFloat(2)
+            if(x<eventXPoints[1]) {
+                if(eventXPoints[0]<x) {
+                    var element = d3.select(listOfCircles[index]).data()[0];
+                    listOfDeaths.push.apply(listOfDeaths, getDeathsForDate(getStringFromDate(element.date)))
+                    maleDeaths = maleDeaths + DEATH_DATE_HASH_MAP.get(getStringFromDate(element.date)).maleDeaths;
+                    femaleDeaths = femaleDeaths + DEATH_DATE_HASH_MAP.get(getStringFromDate(element.date)).femaleDeaths;
+                    totalDeaths = totalDeaths + DEATH_DATE_HASH_MAP.get(getStringFromDate(element.date)).deathList.length;
+                    if(!firstDate) {
+                        firstDate = getStringFromDate(element.date);
+                    }
+                    lastDate = getStringFromDate(element.date);
+                }
+            } else break;
+        }
+        deathsSVGContainer.selectAll("circle").remove();
+        currentDisplayedList = listOfDeaths;
+        drawCircles(listOfDeaths, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
+
+        d3.select(".brush")
+        .append("text")
+        .text(firstDate+" to "+lastDate);
+        console.log(firstDate+" to "+lastDate)
+        brushTooltip.transition()		
+            .duration(200)		
+            .style("opacity", .9);		
+        brushTooltip.html(firstDate+" to "+lastDate 
+            + "<br/>"  
+            + "<b>Deaths: </b>" + totalDeaths
+            + "<br/>"
+            + "<b>Male: </b>" +maleDeaths
+            + "<br/>"
+            + "<b>Female: </b>" +femaleDeaths)	
+            .style("left", (d3.event.sourceEvent.screenX + 20) + "px")		
+            .style("top", (230) + "px");
+            console.log(d3.event)
+    } else {
+        deathsSVGContainer.selectAll("circle").remove();
+        brushTooltip.transition()		
+        .duration(500)		
+        .style("opacity", 0);	
+        // Select text by id and then remove
+        d3.select(".brush").selectAll("text").remove();  // Remove text location
+        currentDisplayedList = DEATHS_AGE_SEX_LIST;
+        displayAllDeaths(DEATHS_AGE_SEX_LIST);
     }
-    deathsSVGContainer.selectAll("circle").remove();
-    drawCircles(listOfDeaths, DEATH_RADIUS, deathsSVGContainer, MAP_HEIGHT, selectedLegend)
 }
 
 function getDeathsForDate(date) {
